@@ -5,7 +5,6 @@ import sys
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication, QDialog
 from PyQt5.uic import loadUiType
-#import reg_window
 
 
 
@@ -22,14 +21,17 @@ form_class, base_class = loadUiType('main_window.ui')
 
 
 HOST, PORT = 'localhost', 5177
+friends = {'233':'Oleksandr','231':'Aleksey'}
 
 class MainWindow(QDialog, form_class):
+    """a."""
     def __init__(self, *args):
         super(MainWindow, self).__init__(*args)
         self.setupUi(self)
         self.cf = ClientConnFactory(self)
         #self.msgView.insertHtml('CONNECTED TO SERVER <br>')
         #self.connectToServer()
+        self.usersList.addItem('Sanya')
 
     def connectToServer(self):
         reactor.connectTCP(HOST, PORT, self.cf)
@@ -41,31 +43,37 @@ class MainWindow(QDialog, form_class):
             try:
                 self.msgView.insertHtml('<font color="red">YOU: </font>'+self.msgEdit.text()+'<br>')
                 #self.cf.sendMessage(msg.encode('utf-8'))
-                self.cf.conn.send(msg)
+                self.cf.conn.send({'type':'messege','to':'id','message':self.msgEdit.text()})
             except error:
-                self.msgView.insertHtml('I CAN`T SEND MESSAGE!')
+                self.msgView.insertHtml('I CAN`T SEND MESSAGE!<br>')
 
 
         self.msgEdit.clear()
 
 
     def GetMessage(self, message):
-        self.msgView.insertHtml(message)
+        self.parseData(message)
+       
+        #self.msgView.insertHtml(message)
+        #self.msgView.insertHtml(message['type'])
+   
+    def parseData(self, data):
+        print('Parse Data')
+        print(data)
+        if data.get('type') == 'info':
+            print('get type ')
+            print(data['messege'])
+            self.msgView.insertHtml(data['messege']+'<br>')
 
     def tick(self):
         print(tick)
-
-    def __del__(self):
-        super.__del__()
-        print('Destructor')
-        reactor.stop()
 
 
 #  -----------------------------------------------------#
 if __name__ == '__main__':
     print("Start app")
     form = MainWindow()
-    form.setWindowTitle('Simple Chat')
+    form.setWindowTitle('Simple messeger')
     form.show()
     form.connectToServer()
     sys.exit(app.exec_())

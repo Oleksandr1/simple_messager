@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import pickle
 from twisted.internet.protocol import ClientFactory
 from twisted.internet.protocol import Protocol
 
@@ -34,7 +35,7 @@ class ClientConnection(Protocol):
 	# This ensures the game will run indefinitely (at least on twisted's end)
 	def connectionMade(self):
 		print("connection made")
-		self.send('Sanya Connected')
+		self.send({'type':'info','messege':'registration'})
 
         		#self.gs.sendData("Connected")
 #***************** RUN OWN MAIN LOOOP
@@ -43,14 +44,16 @@ class ClientConnection(Protocol):
 		# When you get data, send it to the gui
 
 	def dataReceived(self, data):
-		s = data.decode('utf-8')
-		print("GET", s)
+		#s = data.decode('utf-8')
+		#print("GET", s)
+		s = pickle.loads(data)
 		self.gui.GetMessage(s)
 
 	# Send data through the connection
 	def send(self, s):
 		print("send:", s)
-		data = s.encode()
+		#data = s.encode()
+		data = pickle.dumps(s, 2)
 		self.transport.write(data)
 
 	# connection lost
